@@ -437,10 +437,14 @@ class UdacityCourseDownloader:
         self.driver.quit()
 
 def main():
-    # Replace with your credentials and course URL
-    email = "email"
-    password = "password"
-    course_name = "course_name"  # Use the actual course name
+    # Get credentials from environment variables
+    email = os.getenv('UDACITY_EMAIL')
+    password = os.getenv('UDACITY_PASSWORD')
+    course_name = os.getenv('UDACITY_COURSE')
+    
+    if not all([email, password, course_name]):
+        print("Please set UDACITY_EMAIL, UDACITY_PASSWORD, and UDACITY_COURSE environment variables")
+        return
     
     downloader = UdacityCourseDownloader(email, password)
     
@@ -456,4 +460,3 @@ if __name__ == "__main__":
     main()
 
 
-#git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch D:\OneDrive - aucegypt.edu\Desktop\CS221 Stanford\classwork\UDACITY.py' --prune-empty --tag-name-filter cat -- --all
