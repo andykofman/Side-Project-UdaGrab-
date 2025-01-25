@@ -36,8 +36,11 @@ The script will:
 UdaGrab/
 │
 ├── UdacityGrab.py        # Main script file
+
 └── downloaded_videos/   # Directory for downloaded content
+
 ├── .env                  # Environment variables (create this)
+
 ├── .gitignore           # Git ignore file
 ├── README.md            # This file
 └── downloaded_videos/   # Directory for downloaded content
