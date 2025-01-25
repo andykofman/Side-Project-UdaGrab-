@@ -42,7 +42,9 @@ UdaGrab/
 ├── .env                  # Environment variables (create this)
 
 ├── .gitignore           # Git ignore file
+
 ├── README.md            # This file
+
 └── downloaded_videos/   # Directory for downloaded content
 
 ## Error Handling
