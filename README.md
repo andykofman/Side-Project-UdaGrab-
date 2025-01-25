@@ -33,6 +33,9 @@ The script will:
 
 ## Project Structure
 
+UdaGrab/
+│
+├── UdacityGrab.py        # Main script file
 └── downloaded_videos/   # Directory for downloaded content
 ├── .env                  # Environment variables (create this)
 ├── .gitignore           # Git ignore file
