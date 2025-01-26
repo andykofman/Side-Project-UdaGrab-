@@ -415,7 +415,7 @@ class UdacityCourseDownloader:
                 print(f"Downloaded video {i+1}/{len(self.video_urls)}")
             except Exception as e:
                 print(f"Failed to download video {i+1}: {str(e)}")
-
+ 
     def concatenate_videos(self, output_filename="final_video.mp4"):
         try:
             video_files = sorted([f for f in os.listdir(self.download_path) if f.endswith('.mp4')])
