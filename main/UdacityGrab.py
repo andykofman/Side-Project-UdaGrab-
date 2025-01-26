@@ -76,7 +76,7 @@ class UdacityCourseDownloader:
                             if sign_in_link:
                                 print("Found sign in link, clicking...")
                                 self.driver.execute_script("arguments[0].click();", sign_in_link)
-                                time.sleep(5)
+                                time.sleep(0.5)
                                 break
                         except:
                             continue
@@ -84,10 +84,10 @@ class UdacityCourseDownloader:
                     print(f"Error finding sign-in link: {str(e)}")
                     # Try direct navigation as fallback
                     self.driver.get("https://auth.udacity.com/sign-in")
-                    time.sleep(5)
+                    time.sleep(0.5)
             
             # Wait for page load and check URL
-            time.sleep(5)
+            time.sleep(0.5)
             current_url = self.driver.current_url
             print(f"Current URL: {current_url}")
             
@@ -211,12 +211,12 @@ class UdacityCourseDownloader:
                     while time.time() - start_time < max_wait:
                         current_url = self.driver.current_url
                         if dashboard_url in current_url:
-                            print("Successfully redirected to dashboard")
+                            print("Successfully redirected to Course Page")
                             return True
                         elif "sign-up" in current_url:
                             print("Redirected to sign-up page, login failed")
                             return False
-                        time.sleep(2)
+                        time.sleep(1)
 
                     print("Timed out waiting for dashboard redirect")
                     return False
@@ -236,156 +236,39 @@ class UdacityCourseDownloader:
             self.driver.save_screenshot(f"login_error_outer_{time.time()}.png")
             return False
 
-    def navigate_to_course(self, course_name):
+    def navigate_to_course(self, course_url):
+        """Navigate directly to course using URL"""
         try:
-            # First try the dashboard
-            self.driver.get("https://learn.udacity.com/my-programs")
-            print("Navigating to programs page...")
-            time.sleep(5)
-
-            # If redirected to dashboard, try to find "My Programs" or similar navigation
-            dashboard_nav_selectors = [
-                "a[href*='my-programs']",
-                "a[href*='courses']",
-                "//a[contains(text(), 'My Programs')]",
-                "//a[contains(text(), 'Courses')]",
-                "//span[contains(text(), 'My Programs')]/..",
-                "//span[contains(text(), 'Courses')]/.."
-            ]
-
-            for selector in dashboard_nav_selectors:
-                try:
-                    if selector.startswith("//"):
-                        nav_element = WebDriverWait(self.driver, 5).until(
-                            EC.element_to_be_clickable((By.XPATH, selector))
-                        )
-                    else:
-                        nav_element = WebDriverWait(self.driver, 5).until(
-                            EC.element_to_be_clickable((By.CSS_SELECTOR, selector))
-                        )
-                    if nav_element:
-                        print("Found navigation element, clicking...")
-                        self.driver.execute_script("arguments[0].click();", nav_element)
-                        time.sleep(3)
-                        break
-                except:
-                    continue
-
-            # Try to find and click the search icon/button
-            search_button_selectors = [
-                "button[aria-label*='search' i]",  # 'i' flag for case-insensitive
-                "button[title*='search' i]",
-                ".search-icon",
-                "//button[contains(translate(@aria-label, 'SEARCH', 'search'), 'search')]",
-                "//button[contains(@class, 'search')]",
-                "//i[contains(@class, 'search')]/.."
-            ]
-
-            print("Looking for search button...")
-            for selector in search_button_selectors:
-                try:
-                    if selector.startswith("//"):
-                        search_button = WebDriverWait(self.driver, 5).until(
-                            EC.element_to_be_clickable((By.XPATH, selector))
-                        )
-                    else:
-                        search_button = WebDriverWait(self.driver, 5).until(
-                            EC.element_to_be_clickable((By.CSS_SELECTOR, selector))
-                        )
-                    if search_button:
-                        print("Found search button, clicking...")
-                        self.driver.execute_script("arguments[0].click();", search_button)
-                        time.sleep(2)
-                        break
-                except:
-                    continue
-
-            # Try to find the search box
-            search_selectors = [
-                "input[placeholder*='search' i]",
-                "input[type='search']",
-                "input[aria-label*='search' i]",
-                "//input[contains(@placeholder, 'Search')]",
-                "//input[@type='search']"
-            ]
-
-            print("Looking for search input...")
-            for selector in search_selectors:
-                try:
-                    if selector.startswith("//"):
-                        search_box = WebDriverWait(self.driver, 5).until(
-                            EC.presence_of_element_located((By.XPATH, selector))
-                        )
-                    else:
-                        search_box = WebDriverWait(self.driver, 5).until(
-                            EC.presence_of_element_located((By.CSS_SELECTOR, selector))
-                        )
-                    if search_box:
-                        print(f"Found search box, entering course name: {course_name}")
-                        search_box.clear()
-                        # Type the course name with a small delay
-                        for char in course_name:
-                            search_box.send_keys(char)
-                            time.sleep(0.1)
-                        time.sleep(2)
-                        break
-                except:
-                    continue
-
-            # Look for the course in search results
-            course_selectors = [
-                f"//div[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{course_name.lower()}')]",
-                f"//h3[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{course_name.lower()}')]",
-                f"//a[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{course_name.lower()}')]",
-                ".course-card",
-                ".nanodegree-card",
-                "//div[contains(@class, 'card')]"
-            ]
-
-            print("Looking for course in search results...")
-            for selector in course_selectors:
-                try:
-                    if selector.startswith("//"):
-                        course_element = WebDriverWait(self.driver, 10).until(
-                            EC.element_to_be_clickable((By.XPATH, selector))
-                        )
-                    else:
-                        course_element = WebDriverWait(self.driver, 10).until(
-                            EC.element_to_be_clickable((By.CSS_SELECTOR, selector))
-                        )
-                    if course_element:
-                        print("Found course element, clicking...")
-                        # Scroll the element into view
-                        self.driver.execute_script("arguments[0].scrollIntoView(true);", course_element)
-                        time.sleep(1)
-                        self.driver.execute_script("arguments[0].click();", course_element)
-                        time.sleep(5)
-                        return True
-                except:
-                    continue
-
-            print("Could not find course through search")
-            return False
-
+            self.driver.get(course_url)
+            
+            # Wait for course content to load
+            WebDriverWait(self.driver, 20).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='course-curriculum']"))
+        )
+            return True
         except Exception as e:
-            print(f"Navigation failed: {str(e)}")
-            self.driver.save_screenshot(f"course_search_error_{time.time()}.png")
+            print(f"Failed to navigate to course: {str(e)}")
+            self.driver.save_screenshot(f"course_nav_error_{time.time()}.png")
             return False
 
     def collect_video_urls(self):
         try:
-            # Find all chapter sections
-            chapters = WebDriverWait(self.driver, 10).until(
-                EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".lesson-list"))
+            # Expand all lessons first
+            expand_buttons = self.driver.find_elements(By.XPATH, "//button[contains(@aria-label, 'Expand')]")
+            for btn in expand_buttons:
+                self.driver.execute_script("arguments[0].scrollIntoView();", btn)
+                btn.click()
+                time.sleep(1)
+
+            # Find video links
+            video_links = WebDriverWait(self.driver, 20).until(
+                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a[href*='/videos/']"))
             )
             
-            for chapter in chapters:
-                # Find all video links in the chapter
-                video_elements = chapter.find_elements(By.CSS_SELECTOR, "a[href*='video']")
-                for video_element in video_elements:
-                    self.video_urls.append(video_element.get_attribute("href"))
-            
+            self.video_urls = [link.get_attribute("href") for link in video_links]
+            print(f"Found {len(self.video_urls)} video links")
             return True
+            
         except Exception as e:
             print(f"Failed to collect video URLs: {str(e)}")
             return False
@@ -437,19 +320,19 @@ class UdacityCourseDownloader:
         self.driver.quit()
 
 def main():
-    # Get credentials from environment variables
+    # Get credentials and course URL from environment variables
     email = os.getenv('UDACITY_EMAIL')
     password = os.getenv('UDACITY_PASSWORD')
-    course_name = os.getenv('UDACITY_COURSE')
+    course_url = os.getenv('UDACITY_COURSE_URL')  # Changed from course_name to course_url
     
-    if not all([email, password, course_name]):
-        print("Please set UDACITY_EMAIL, UDACITY_PASSWORD, and UDACITY_COURSE environment variables")
+    if not all([email, password, course_url]):
+        print("Please set UDACITY_EMAIL, UDACITY_PASSWORD, and UDACITY_COURSE_URL environment variables")
         return
     
     downloader = UdacityCourseDownloader(email, password)
     
     if downloader.login():
-        if downloader.navigate_to_course(course_name):
+        if downloader.navigate_to_course(course_url):  # Now using course_url
             if downloader.collect_video_urls():
                 downloader.download_videos()
                 downloader.concatenate_videos()
